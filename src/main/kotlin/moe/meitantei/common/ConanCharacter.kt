@@ -1,4 +1,3 @@
 package moe.meitantei.common
 
-class ConanCharacter {
-}
+data class ConanCharacter(val name: String) {}

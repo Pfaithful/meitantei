@@ -11,54 +11,56 @@ fun episode(episodeInfo: ConanEpisode.() -> Unit): ConanEpisode =
  * might make up multiple actual episodes, with multiple titles, broadcast ratings and the like
  */
 class ConanEpisode {
-    var title = emptyList<String>()
-    var japaneseTitle = mutableListOf<JapaneseTitle>()
+    private var title = emptyList<String>()
+    private var japaneseTitle = mutableListOf<JapaneseTitle>()
     var broadcastRating = mutableListOf<Double>()
-    var canonCase: Boolean = false
-    var caseNumber: MutableList<Int> = mutableListOf()
-    var broadcastDate: List<LocalDate> = mutableListOf()
-    var remasteredDate: List<LocalDate> = mutableListOf()
-    var season: Int = 0
-    var mangaSource: List<String> = mutableListOf()
+    var canonCase = false
+    private var caseNumber: MutableList<Int> = mutableListOf()
+    private var broadcastDate: List<LocalDate> = mutableListOf()
+    private var remasteredDate: List<LocalDate> = mutableListOf()
+    private var season: Int = 0
+    var mangaSource: List<String> = mutableListOf<String>()
+    private var englishInfo: FunimationInfo = FunimationInfo()
+    var castList: List<ConanCharacter> = emptyList()
+    var solvedBy: List<ConanCharacter> = emptyList()
+    var episodeStaff: EpisodeStaff = EpisodeStaff()
+    var openingSong: String = ""
+    var closingSong: String = ""
     val with = this
 
-    infix fun title(episodeTitle: List<String>?): ConanEpisode {
-        if (episodeTitle != null) {
+    infix fun title(episodeTitle: List<String>): ConanEpisode {
             title = episodeTitle
-        }
+
         return this
     }
 
-    infix fun japaneseTitle(episodeTitle: List<String>?): ConanEpisode {
-        if (episodeTitle != null) {
+    infix fun japaneseTitle(episodeTitle: List<String>): ConanEpisode {
             for (x in episodeTitle.indices step 2)
                 japaneseTitle.add(JapaneseTitle(episodeTitle[0], episodeTitle[1]))
-        }
+
         return this
     }
 
-    infix fun broadcastRatings(ratings: List<String>?): ConanEpisode {
-        if (ratings != null) {
+    infix fun broadcastRatings(ratings: List<String>): ConanEpisode {
             for (rating in ratings) {
                 val doubleRating: Double = ratingPercentage(rating)
                 broadcastRating.add(doubleRating)
             }
-        }
+
         return this
     }
 
-    fun caseNumber(canon: List<String>?, filler: List<String>?): ConanEpisode {
-        if (canon != null) {
+    fun caseNumber(canon: List<String>, filler: List<String>): ConanEpisode {
+        if (canon.isNotEmpty()) {
             canonCase = true
             caseNumber.addAll(convertCaseNumber(canon))
-        } else if (filler != null) {
+        } else if (filler.isNotEmpty()) {
             caseNumber.addAll(convertCaseNumber(filler))
         }
         return this
     }
 
-    infix fun broadcastDate(dates: List<String>?): ConanEpisode {
-        if (dates != null) {
+    infix fun broadcastDate(dates: List<String>): ConanEpisode {
             broadcastDate = dates.filter { date ->
                 !date.contains("\\(Remastered Version\\)|\\*".toRegex())
             }.map { date ->
@@ -73,23 +75,61 @@ class ConanEpisode {
             }.map { date ->
                 stringToDate(date)
             }.toList()
+        return this
+    }
+
+    infix fun season(airedSeason: List<String>): ConanEpisode {
+        season = airedSeason.single().toInt()
+        return this
+    }
+
+    infix fun mangaSource(source: List<String>): ConanEpisode {
+        mangaSource = source
+        return this
+    }
+
+    infix fun funimationInfo(pair: Pair<List<String>, List<String>>): ConanEpisode {
+        if (pair.first.isNotEmpty() && pair.second.isNotEmpty()) {
+            englishInfo = englishInfo.fromPair(Pair(pair.first, pair.second))
         }
         return this
     }
 
-    infix fun season(airedSeason: List<String>?): ConanEpisode {
-        season = airedSeason?.single()?.toInt()!!
+    infix fun cast(cast: List<String>): ConanEpisode {
+        this.castList = cast.map{name ->
+            ConanCharacter(name)
+        }
         return this
     }
 
-    infix fun mangaSource(source: List<String>?): ConanEpisode {
-        mangaSource = source!!
+    infix fun solvedBy(people: List<String>): ConanEpisode {
+        this.solvedBy = people.map {
+            name -> cleanSolvedBy(name)
+        }.map { detective ->
+            ConanCharacter(detective)
+        }
         return this
     }
 
+    infix fun staff(staff: EpisodeStaff): ConanEpisode {
+        this.episodeStaff = staff
+        return this
+    }
+
+    infix fun openingSong(song: List<String>): ConanEpisode {
+        this.openingSong = song.single()
+        return this
+    }
+
+    infix fun closingSong(song: List<String>): ConanEpisode {
+        this.closingSong = song.single()
+        return this
+    }
 
     private fun ratingPercentage(rating: String): Double {
-        val arr = rating.replace("%", "").replace(",", ".").split(" ")
+        val arr = rating.replace("%", "")
+            .replace(",", ".")
+            .split(" ")
         return if (arr[0] == "?.?")
             0.0
         else
@@ -100,6 +140,9 @@ class ConanEpisode {
         caseNumbers.map { case ->
             case.replace("#", "").toInt()
         }.toList()
+
+    private fun cleanSolvedBy(input: String): String =
+        input.replace("\\(x\\d\\)".toRegex(), "").trim()
 
     override fun toString(): String =
         "Title(s): ${formatArrayToString(title)}" +
