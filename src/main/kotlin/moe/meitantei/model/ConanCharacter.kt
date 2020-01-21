@@ -1,3 +1,3 @@
-package moe.meitantei.common
+package moe.meitantei.model
 
 data class ConanCharacter(val name: String) {}

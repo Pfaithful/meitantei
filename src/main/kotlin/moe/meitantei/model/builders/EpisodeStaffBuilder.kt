@@ -1,6 +1,6 @@
-package moe.meitantei.common.builders
+package moe.meitantei.model.builders
 
-import moe.meitantei.common.EpisodeStaff
+import moe.meitantei.model.EpisodeStaff
 
 class EpisodeStaffBuilder(private var director: String = "") {
     private val organizers: MutableList<String> = mutableListOf()

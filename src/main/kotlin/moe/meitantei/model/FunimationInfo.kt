@@ -1,4 +1,4 @@
-package moe.meitantei.common
+package moe.meitantei.model
 
 class FunimationInfo(var titles: List<String> = listOf(), var dubbedCount: List<Int> = listOf()) {
 

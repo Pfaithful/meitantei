@@ -1,9 +1,9 @@
 package moe.meitantei.scraping
 
-import moe.meitantei.common.ConanEpisode
-import moe.meitantei.common.EpisodeStaff
-import moe.meitantei.common.builders.EpisodeStaffBuilder
-import moe.meitantei.common.episode
+import moe.meitantei.model.ConanEpisode
+import moe.meitantei.model.EpisodeStaff
+import moe.meitantei.model.builders.EpisodeStaffBuilder
+import moe.meitantei.model.builders.episode
 import moe.meitantei.scraping.utils.cleanHtmlFromHeader
 import moe.meitantei.scraping.utils.cleanHtmlFromValue
 import org.jsoup.Jsoup
@@ -54,7 +54,7 @@ class ConanScraper(private var baseUrl: String) {
             with staff buildEpisodeStaff(infoMap)
             with openingSong infoMap.getValue(ScrapeHeader.OPENING_SONG)
             with closingSong infoMap.getValue(ScrapeHeader.CLOSING_SONG)
-        }
+        }.build()
 
     private fun extractInformation(document: Document): Map<ScrapeHeader, List<String>> {
         val infoTable = document.select("tbody")
